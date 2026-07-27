@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="CareerLogo.png" />
+<title>User Portfolio - CareerMantra</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+  --bg:#f5f6ff;
+  --card:#ffffff;
+  --text:#1A2A80;
+}
+.dark{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --text:#e5e7eb;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  transition:.4s;
+}
+
+.card-custom{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:0 6px 15px rgba(0,0,0,.15);
+  padding:20px;
+}
+
+.portfolio-card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:0 6px 15px rgba(0,0,0,.15);
+  padding:15px;
+  position:relative;
+}
+
+.dark .form-control,
+.dark textarea{
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #475569;
+}
+
+.dark .form-control::placeholder{
+  color:#94a3b8;
+}
+
+.dark .navbar{
+  background:#020617!important;
+}
+
+.user-icon{
+  margin-left: 10px;
+  font-size: 1.4rem;
+}
+
+.btn-grp{
+  background-color: rgb(72, 70, 70);
+  opacity: 0.7;
+  transition:.8s;
+  margin-right: 5px;
+  width: 200px;
+}
+.btn-grp:hover{
+  background-color: black;
+  opacity: 1;
+  transition:.8s;
+}
+.btn-addInfo{
+  background-color: rgb(72, 70, 70);
+  opacity: 0.7;
+  transition:.8s;
+  margin-right: 5px;
+  width: 200px;
+}
+#improveBtn{
+  background-color: rgb(72, 70, 70);
+  opacity: 0.7;
+  transition:.8s;
+  margin-right: 5px;
+  width: 200px;
+  color: white;
+}
+#descBtn{
+  background-color: rgb(72, 70, 70);
+  opacity: 0.7;
+  transition:.8s;
+  margin-right: 5px;
+  width: 200px;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-primary px-4">
+  <span class="navbar-brand fw-bold">CareerMantra – Portfolio Builder</span>
+  <div class="d-flex gap-2 align-items-center">
+    <button class="btn btn-light btn-sm" onclick="toggleTheme()">🌗</button>
+  </div>
+</nav>
+
+<div class="container my-4">
+
+<div class="card-custom mb-4">
+<h4 class="text-center mb-3 ">Add / Update Portfolio Entry<i class="fa-solid fa-user-tie user-icon"></i></h4>
+
+<div class="row g-2">
+  <div class="col-md-6"><input class="form-control" id="title" placeholder="Project Title"></div>
+  <div class="col-md-6"><input class="form-control" id="duration" placeholder="Duration"></div>
+  <div class="col-md-6"><input class="form-control" id="role" placeholder="Your Role"></div>
+  <div class="col-md-6"><input class="form-control" id="team" placeholder="Team Members"></div>
+  <div class="col-md-6"><input class="form-control" id="skills" placeholder="Skills (comma separated)"></div>
+  <div class="col-md-6"><input class="form-control" id="tools" placeholder="Tools / Technologies"></div>
+  <div class="col-md-6"><input class="form-control" id="link" placeholder="Project Link"></div>
+  <div class="col-md-6"><input class="form-control" id="outcome" placeholder="Outcome / Achievement"></div>
+  <div class="col-12">
+    <textarea class="form-control" id="description" rows="3" placeholder="Project Description"></textarea>
+  </div>
+  <div class="col-12 mt-2 text-center">
+  <button type="button" id="improveBtn" class="btn btn-warning btn-sm" onclick="improveText()">✨ Improve Description</button>
+  <button type="button" id="descBtn" class="btn btn-info btn-sm" onclick="generateDescription()">🤖 Auto Generate</button>
+</div>
+</div>
+
+<div class="text-center mt-3">
+  <button class="btn btn-primary px-5 btn-addInfo" id="saveBtn">Save Portfolio</button>
+</div>
+</div>
+
+<div class="d-flex justify-content-between mb-3">
+  <input class="form-control w-50" id="searchBox" placeholder="Search portfolio...">
+  <span class="fw-bold">Portfolio Strength: <span id="strengthScore">0</span>/100</span>
+</div>
+
+<div id="portfolioList" class="row g-4"></div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey:"AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+ authDomain:"auth-demo-37f58.firebaseapp.com",
+ projectId:"auth-demo-37f58",
+ storageBucket:"auth-demo-37f58.appspot.com",
+ messagingSenderId:"799076361553",
+ appId:"1:799076361553:web:6ff356a4d894a27cfb9f70"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let currentUser=null;
+let updateId=null;
+
+/* THEME */
+window.toggleTheme=()=>{
+ document.body.classList.toggle("dark");
+ localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light");
+};
+if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
+
+/* AUTH */
+onAuthStateChanged(auth,user=>{
+ if(user){
+  currentUser=user;
+  loadPortfolio();
+ }else{
+  window.location.href="loginPage.html";
+ }
+});
+
+/* SAVE / UPDATE */
+saveBtn.addEventListener("click",async()=>{
+ if(!currentUser) return;
+
+ const data={
+  title:title.value.trim(),
+  description:description.value.trim(),
+  skills:skills.value.trim(),
+  tools:tools.value.trim(),
+  link:link.value.trim(),
+  duration:duration.value.trim(),
+  role:role.value.trim(),
+  team:team.value.trim(),
+  outcome:outcome.value.trim(),
+  tags:(skills.value+","+tools.value).toLowerCase(), // ML ready
+  timestamp:new Date()
+ };
+
+ if(!data.title) return alert("Title required");
+
+ if(updateId){
+  await updateDoc(doc(db,"users",currentUser.uid,"portfolio",updateId),data);
+  updateId=null;
+  saveBtn.textContent="Save Portfolio";
+ }else{
+  await addDoc(collection(db,"users",currentUser.uid,"portfolio"),data);
+ }
+
+ portfolioFormReset();
+ loadPortfolio();
+});
+
+/* RESET FORM */
+function portfolioFormReset(){
+ title.value="";
+ description.value="";
+ skills.value="";
+ tools.value="";
+ link.value="";
+ duration.value="";
+ role.value="";
+ team.value="";
+ outcome.value="";
+}
+
+/* LOAD */
+async function loadPortfolio(){
+ portfolioList.innerHTML="";
+ const snap=await getDocs(collection(db,"users",currentUser.uid,"portfolio"));
+
+ let strength=0;
+
+ snap.forEach(docSnap=>{
+  const d=docSnap.data();
+  strength+=10;
+
+  const col=document.createElement("div");
+  col.className="col-md-4";
+  col.innerHTML=`
+   <div class="portfolio-card h-100">
+    <h5>${d.title}</h5>
+    <p>${d.description}</p>
+    ${d.skills?`<p><b>Skills:</b> ${d.skills}</p>`:""}
+    ${d.tools?`<p><b>Tools:</b> ${d.tools}</p>`:""}
+    ${d.link?`<a href="${d.link}" target="_blank">Project Link</a>`:""}
+    <p class="mt-2"><b>Outcome:</b> ${d.outcome}</p>
+    <div class="d-flex gap-2 mt-3">
+      <button class="btn btn-success w-100 updateBtn btn-grp">Update</button>
+      <button class="btn btn-danger w-100 deleteBtn btn-grp">Delete</button>
+    </div>
+   </div>`;
+  portfolioList.appendChild(col);
+
+  col.querySelector(".deleteBtn").onclick=async()=>{
+    if(confirm("Delete this entry?")){
+      await deleteDoc(doc(db,"users",currentUser.uid,"portfolio",docSnap.id));
+      loadPortfolio();
+    }
+  };
+
+  col.querySelector(".updateBtn").onclick=()=>{
+    title.value=d.title;
+    description.value=d.description;
+    skills.value=d.skills;
+    tools.value=d.tools;
+    link.value=d.link;
+    duration.value=d.duration;
+    role.value=d.role;
+    team.value=d.team;
+    outcome.value=d.outcome;
+    updateId=docSnap.id;
+    saveBtn.textContent="Update Portfolio";
+  };
+ });
+
+ strengthScore.innerText=Math.min(strength,100);
+}
+
+/* SEARCH */
+searchBox.addEventListener("input",()=>{
+ const text=searchBox.value.toLowerCase();
+ document.querySelectorAll(".portfolio-card").forEach(c=>{
+  c.style.display=c.innerText.toLowerCase().includes(text)?"block":"none";
+ });
+});
+// 🔹 Improve Text
+window.improveText = async () => {
+  const text = description.value.trim();
+
+  if(!text){
+    alert("Write something first!");
+    return;
+  }
+
+  try{
+    const res = await fetch("http://127.0.0.1:5000/improve-text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+    description.value = data.improved_text;
+
+  }catch(err){
+    alert("Flask server not running!");
+  }
+};
+
+
+// 🔹 Generate Description
+window.generateDescription = async () => {
+
+  const titleVal = title.value.trim();
+  const skillsVal = skills.value.trim();
+  const toolsVal = tools.value.trim();
+
+  if(!titleVal){
+    alert("Enter project title first!");
+    return;
+  }
+
+  try{
+    const res = await fetch("http://127.0.0.1:5000/generate-description", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: titleVal,
+        skills: skillsVal,
+        tools: toolsVal
+      })
+    });
+
+    const data = await res.json();
+    description.value = data.generated_text;
+
+  }catch(err){
+    alert("Flask server not running!");
+  }
+};
+</script>
+
+</body>
+</html>

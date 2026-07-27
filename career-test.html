@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<link rel="icon" href="CareerLogo.png"/>
+
+<title>CareerMantra - Personality Test</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#F5F5FA;
+color:#1A2A80;
+}
+
+header{
+background:#1A2A80;
+color:#fff;
+padding:15px;
+text-align:center;
+}
+
+.section{
+padding:40px 20px;
+max-width:1000px;
+margin:auto;
+}
+
+h2,h3{
+text-align:center;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+margin-top:20px;
+}
+
+.card{
+background:#B2B0E8;
+padding:20px;
+border-radius:15px;
+text-align:center;
+font-weight:bold;
+transition:transform .3s;
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card:hover{
+transform:scale(1.05);
+}
+
+#quizSection,#careerFields,#scoreSection{
+display:none;
+}
+
+.quiz-box{
+background:#fff;
+padding:20px;
+border-radius:10px;
+margin:10px 0;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.score-box{
+background:#fff;
+border-radius:12px;
+padding:20px;
+margin:20px auto;
+max-width:500px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.score-row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+font-weight:bold;
+}
+
+.chart-container{
+max-width:500px;
+margin:30px auto;
+}
+
+button{
+background:#3B38A0;
+color:#fff;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+margin-top:15px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#1A2A80;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>CareerMantra - Personality Test</h1>
+</header>
+
+<section id="introSection" class="section">
+
+<h2>Start the Personality Test</h2>
+
+<p style="text-align:center;">
+Answer a few questions to understand your personality and suitable career paths.
+</p>
+
+<div style="text-align:center;">
+<button onclick="startUniversalQuiz()">Start Test</button>
+</div>
+
+</section>
+
+<section id="quizSection" class="section">
+
+<h2>Personality Quiz</h2>
+
+<form id="quizForm"></form>
+
+<div style="text-align:center;">
+<button type="button" onclick="finishQuiz()">Submit Quiz</button>
+</div>
+
+</section>
+
+<section id="scoreSection" class="section">
+
+<h2>Your Personality Scores</h2>
+
+<div class="score-box" id="scoreBox"></div>
+
+<div class="chart-container">
+<canvas id="personalityChart"></canvas>
+</div>
+
+<h3 id="personalityResult"></h3>
+
+</section>
+
+<section id="careerFields" class="section">
+
+<h2>Recommended Career Fields</h2>
+
+<div class="chart-container">
+<canvas id="careerChart"></canvas>
+</div>
+
+<div id="careerCards" class="cards"></div>
+
+</section>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore,collection,addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+authDomain:"auth-demo-37f58.firebaseapp.com",
+projectId:"auth-demo-37f58",
+storageBucket:"auth-demo-37f58.firebasestorage.app",
+messagingSenderId:"799076361553",
+appId:"1:799076361553:web:6ff356a4d894a27cfb9f70"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const universalQuiz=[
+{q:"Do you enjoy analyzing data and solving complex problems?",type:"analytical"},
+{q:"Do you love creating art or designs?",type:"creative"},
+{q:"Do you prefer working alone?",type:"introvert"},
+{q:"Do you enjoy interacting with people?",type:"extrovert"},
+{q:"Do you like deep research?",type:"introvert"},
+{q:"Do you feel energized around people?",type:"extrovert"},
+{q:"Do you enjoy logical planning?",type:"analytical"},
+{q:"Do you enjoy storytelling?",type:"creative"},
+{q:"Do you like structured thinking?",type:"analytical"},
+{q:"Do you like being in the spotlight?",type:"extrovert"}
+];
+
+let currentUser=null;
+onAuthStateChanged(auth,user=>currentUser=user);
+
+window.startUniversalQuiz=()=>{
+
+document.getElementById("introSection").style.display="none";
+document.getElementById("quizSection").style.display="block";
+
+const form=document.getElementById("quizForm");
+form.innerHTML="";
+
+universalQuiz.forEach((item,i)=>{
+
+const div=document.createElement("div");
+div.className="quiz-box";
+
+div.innerHTML=`
+<p><b>Q${i+1}. ${item.q}</b></p>
+
+<label><input type="radio" name="q${i}" value="2"> Yes</label><br>
+<label><input type="radio" name="q${i}" value="1"> Sometimes</label><br>
+<label><input type="radio" name="q${i}" value="0"> No</label>
+`;
+
+form.appendChild(div);
+
+});
+
+};
+
+function drawPersonalityChart(scores){
+
+const ctx=document.getElementById("personalityChart");
+
+new Chart(ctx,{
+type:"pie",
+
+data:{
+labels:["Analytical","Creative","Introvert","Extrovert"],
+
+datasets:[{
+
+data:[
+scores.analytical,
+scores.creative,
+scores.introvert,
+scores.extrovert
+],
+
+backgroundColor:[
+"#3B38A0",
+"#6C63FF",
+"#8E87FF",
+"#B2B0E8"
+]
+
+}]
+
+}
+
+});
+
+}
+
+function drawCareerChart(careers){
+
+const ctx=document.getElementById("careerChart");
+
+const labels=careers.map(c=>c.career);
+const scores=careers.map(c=>c.score);
+
+new Chart(ctx,{
+type:"bar",
+
+data:{
+labels:labels,
+
+datasets:[{
+
+label:"Career Match %",
+
+data:scores,
+
+backgroundColor:[
+"#3B38A0",
+"#6C63FF",
+"#8E87FF",
+"#B2B0E8",
+"#CFCDF5"
+]
+
+}]
+
+},
+
+options:{
+plugins:{legend:{display:false}},
+scales:{y:{beginAtZero:true,max:100}}
+}
+
+});
+
+}
+
+window.finishQuiz=async()=>{
+
+let scores={analytical:0,creative:0,introvert:0,extrovert:0};
+let answeredAll=true;
+
+universalQuiz.forEach((item,i)=>{
+
+const val=document.querySelector(`input[name="q${i}"]:checked`);
+
+if(!val)answeredAll=false;
+else scores[item.type]+=Number(val.value);
+
+});
+
+if(!answeredAll){
+alert("Please answer all questions");
+return;
+}
+
+const maxScore=Math.max(...Object.values(scores));
+const dominantTypes=Object.keys(scores).filter(t=>scores[t]===maxScore);
+
+document.getElementById("quizSection").style.display="none";
+document.getElementById("scoreSection").style.display="block";
+
+const scoreBox=document.getElementById("scoreBox");
+scoreBox.innerHTML="";
+
+for(let key in scores){
+
+scoreBox.innerHTML+=`
+<div class="score-row">
+<span>${key.toUpperCase()}</span>
+<span>${scores[key]}</span>
+</div>
+`;
+}
+
+drawPersonalityChart(scores);
+
+document.getElementById("personalityResult").innerText=
+`Suggested Personality: ${dominantTypes.map(t=>t.toUpperCase()).join(", ")}`;
+
+const response=await fetch("http://127.0.0.1:5000/predict",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(scores)
+
+});
+
+const mlCareers=await response.json();
+
+document.getElementById("careerFields").style.display="block";
+
+const careerDiv=document.getElementById("careerCards");
+careerDiv.innerHTML="";
+
+mlCareers.forEach(c=>{
+
+const card=document.createElement("div");
+card.className="card";
+card.textContent=c.career;
+
+careerDiv.appendChild(card);
+
+});
+
+drawCareerChart(mlCareers);
+
+if(currentUser){
+
+await addDoc(collection(db,"users",currentUser.uid,"quizResults"),{
+
+personality:dominantTypes,
+scores:scores,
+recommended:mlCareers,
+timestamp:new Date()
+
+});
+
+}
+
+};
+
+</script>
+
+</body>
+</html>

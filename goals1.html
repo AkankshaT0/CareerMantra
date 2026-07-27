@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="CareerLogo.png" />
+<title>Career Goals Planner - CareerMantra</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+  --bg:#f5f6ff;
+  --card:#ffffff;
+  --text:#1A2A80;
+}
+.dark{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --text:#e5e7eb;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  transition:.4s;
+}
+
+.goal-card{
+  border-left:6px solid #3B38A0;
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.1);
+  padding:20px;
+}
+
+.progress{height:10px;}
+
+.milestones label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Dark mode fixes */
+.dark .form-control,
+.dark .form-select{
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #475569;
+}
+
+.dark .form-control::placeholder{
+  color:#94a3b8;
+}
+
+.dark small{
+  color:#cbd5f5;
+}
+
+.dark .navbar{
+  background:#020617 !important;
+}
+
+.goalicon{
+  font-size: 0.9rem;
+  margin-left: 7px;
+  color: #e3e4eb;
+}
+.btn-grp{
+  background-color: rgb(72, 70, 70);
+  opacity: 0.7;
+  transition:.8s;
+  margin-right: 5px;
+  width: 200px;
+}
+.btn-grp:hover{
+  background-color: black;
+  opacity: 1;
+  transition:.8s;
+}
+.btn-addgoal{
+  background-color: rgb(72, 70, 70);
+  opacity: 0.7;
+  transition:.8s;
+  margin-right: 5px;
+  width: 200px;
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-primary px-4">
+  <span class="navbar-brand fw-bold">CareerMantra – Career Goals Planner</span>
+  <div class="d-flex align-items-center gap-3 text-white">
+    <span id="userInfo"></span>
+    <button class="btn btn-light btn-sm" onclick="toggleTheme()">🌗</button>
+    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="container my-4">
+
+<div class="card p-3 shadow-sm mb-4">
+<h4 class="text-center mb-3">Add New Goal</h4>
+<div class="row g-2">
+  <div class="col-md-4">
+    <input class="form-control" id="goalTitle" placeholder="Goal title">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" id="goalType">
+      <option>Short-term</option>
+      <option>Long-term</option>
+    </select>
+  </div>
+  <div class="col-md-5">
+    <input class="form-control" id="milestonesInput" placeholder="Milestones (comma separated)">
+  </div>
+</div>
+
+<div class="text-center mt-3">
+  <button class="btn btn-primary px-5 btn-addgoal" onclick="addGoal()">Add Goal<i class="fa-solid fa-bullseye goalicon"></i></button>
+</div>
+</div>
+
+<div id="goalsList"></div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey:"AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+ authDomain:"auth-demo-37f58.firebaseapp.com",
+ projectId:"auth-demo-37f58",
+ storageBucket:"auth-demo-37f58.appspot.com",
+ messagingSenderId:"799076361553",
+ appId:"1:799076361553:web:6ff356a4d894a27cfb9f70"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let currentUser=null;
+
+/* THEME */
+window.toggleTheme=()=>{
+ document.body.classList.toggle("dark");
+ localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light");
+};
+if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
+
+/* AUTH */
+onAuthStateChanged(auth,user=>{
+ if(user){
+  currentUser=user;
+  userInfo.innerText=user.email;
+  loadGoals();
+ }else{
+  window.location.href="loginPage.html";
+ }
+});
+
+/* LOAD GOALS */
+async function loadGoals(){
+ const goalsList=document.getElementById("goalsList");
+ goalsList.innerHTML="<p class='text-center'>Loading goals...</p>";
+
+ const snap=await getDocs(collection(db,"users",currentUser.uid,"goals"));
+
+ if(snap.empty){
+  goalsList.innerHTML="<p class='text-center'>No goals added yet.</p>";
+  return;
+ }
+
+ goalsList.innerHTML="";
+ snap.forEach(d=>{
+  const goal=d.data();
+  const goalId=d.id;
+
+  let completed=0;
+  let milestonesHTML="";
+
+  (goal.milestones||[]).forEach((m,i)=>{
+   if(m.done) completed++;
+   milestonesHTML+=`
+    <label>
+     <input type="checkbox" ${m.done?"checked":""}
+      onchange="toggleMilestone('${goalId}',${i})">
+     ${m.text}
+    </label>`;
+  });
+
+  const progress=goal.milestones?.length
+   ?Math.round(completed/goal.milestones.length*100):0;
+
+  const div=document.createElement("div");
+  div.className="goal-card mb-4";
+  div.innerHTML=`
+   <input class="form-control mb-2" id="title_${goalId}" value="${goal.title}">
+   <select class="form-select mb-2" id="type_${goalId}">
+    <option ${goal.type=="Short-term"?"selected":""}>Short-term</option>
+    <option ${goal.type=="Long-term"?"selected":""}>Long-term</option>
+   </select>
+
+   <textarea class="form-control mb-2" id="milestones_${goalId}" rows="2">${goal.milestones.map(m=>m.text).join(", ")}</textarea>
+
+   <div class="milestones">${milestonesHTML}</div>
+
+   <div class="progress mt-2">
+     <div class="progress-bar bg-primary" style="width:${progress}%"></div>
+   </div>
+   <small>${progress}% completed</small>
+
+   <div class="d-flex gap-2 mt-3">
+     <button class="btn btn-success btn-grp w-100" onclick="updateGoal('${goalId}')">Update</button>
+     <button class="btn btn-danger btn-grp w-100" onclick="deleteGoal('${goalId}')">Delete</button>
+   </div>
+  `;
+  goalsList.appendChild(div);
+ });
+}
+
+/* ADD GOAL — FIXED */
+window.addGoal=async()=>{
+ const title=document.getElementById("goalTitle").value.trim();
+ const type=document.getElementById("goalType").value;
+ const milestoneText=document.getElementById("milestonesInput").value.trim();
+
+ if(!title) return alert("Enter goal title");
+
+ const milestones=milestoneText
+ ? milestoneText.split(",").map(m=>({text:m.trim(),done:false}))
+ : [];
+
+ await addDoc(collection(db,"users",currentUser.uid,"goals"),{
+  title,type,milestones,
+  createdAt:new Date()
+ });
+
+ document.getElementById("goalTitle").value="";
+ document.getElementById("milestonesInput").value="";
+ loadGoals();
+};
+
+/* UPDATE */
+window.updateGoal=async(id)=>{
+ const title=document.getElementById(`title_${id}`).value.trim();
+ const type=document.getElementById(`type_${id}`).value;
+ const milestoneText=document.getElementById(`milestones_${id}`).value.trim();
+
+ const milestones=milestoneText
+ ? milestoneText.split(",").map(m=>({text:m.trim(),done:false}))
+ : [];
+
+ await updateDoc(doc(db,"users",currentUser.uid,"goals",id),{
+  title,type,milestones
+ });
+
+ loadGoals();
+};
+
+/* TOGGLE */
+window.toggleMilestone=async(id,index)=>{
+ const ref=doc(db,"users",currentUser.uid,"goals",id);
+ const snap=await getDoc(ref);
+ const goal=snap.data();
+
+ goal.milestones[index].done=!goal.milestones[index].done;
+
+ await updateDoc(ref,{milestones:goal.milestones});
+ loadGoals();
+};
+
+/* DELETE */
+window.deleteGoal=async(id)=>{
+ if(confirm("Delete this goal?")){
+  await deleteDoc(doc(db,"users",currentUser.uid,"goals",id));
+  loadGoals();
+ }
+};
+
+/* LOGOUT */
+window.logout=()=>signOut(auth);
+</script>
+
+
+</body>
+</html>

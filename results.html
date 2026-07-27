@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="CareerLogo.png" />
+<title>My Career Recommendations</title>
+<style>
+  body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#F5F5FA;
+    color:#1A2A80;
+  }
+  header {
+    background:#1A2A80;
+    color:#fff;
+    padding:15px;
+    text-align:center;
+  }
+  .section {
+    padding:40px 20px;
+    max-width:1000px;
+    margin:auto;
+  }
+  h2,h3 { text-align:center; }
+  .cards {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+    margin-top:20px;
+  }
+  .card {
+    background:#B2B0E8;
+    padding:20px;
+    border-radius:15px;
+    text-align:left;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+  }
+  .card:hover {
+    transform: scale(1.03);
+  }
+  .card h3 { margin-top:0; color:#1A2A80; }
+  .card ul { margin:10px 0; padding-left:20px; }
+  #loading { text-align:center; margin-top:30px; font-size:1.2rem; color:#444; }
+  button {
+    background:#3B38A0;
+    color:#fff;
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    margin-top:25px;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  button:hover { background:#1A2A80; }
+  .btn-container {
+    text-align:center;
+    margin-top:30px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>My Career Recommendations</h1>
+</header>
+
+<section class="section">
+  <div id="loading">Loading your quiz history...</div>
+  <div id="quizResults" class="cards"></div>
+  <div class="btn-container">
+    <button onclick="goBack()">🎯 Take New Personality Test</button>
+  </div>
+</section>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 🔹 Firebase Config (same as in career-test.html)
+const firebaseConfig = {
+  apiKey: "AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+  authDomain: "auth-demo-37f58.firebaseapp.com",
+  projectId: "auth-demo-37f58",
+  storageBucket: "auth-demo-37f58.firebasestorage.app",
+  messagingSenderId: "799076361553",
+  appId: "1:799076361553:web:6ff356a4d894a27cfb9f70",
+  measurementId: "G-RPZBW0SCK5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const resultsDiv = document.getElementById("quizResults");
+const loadingDiv = document.getElementById("loading");
+
+// Format Firestore Timestamp
+function formatDate(timestamp){
+  try {
+    return timestamp ? timestamp.toDate().toLocaleString() : "Unknown Date";
+  } catch {
+    return "Unknown Date";
+  }
+}
+
+// Fetch quiz results from Firebase Firestore
+async function loadQuizResults(user){
+  try {
+    const qRef = collection(db, "users", user.uid, "quizResults");
+    const q = query(qRef, orderBy("timestamp", "desc"));
+    const snapshot = await getDocs(q);
+
+    loadingDiv.style.display = "none";
+
+    if(snapshot.empty){
+      resultsDiv.innerHTML = "<p style='text-align:center;'>No quiz results found. Take a test first!</p>";
+      return;
+    }
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const recommendedList = (data.recommended && data.recommended.length > 0) 
+        ? `<ul>${data.recommended.map(r=>`<li>${r}</li>`).join('')}</ul>` 
+        : "<p>No recommendations available.</p>";
+
+      const scoreDisplay = data.score ? `${data.score}/5` : "N/A";
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>🧩 ${data.personality?.toUpperCase() || "Unknown"} Personality</h3>
+        <p><b>Score:</b> ${scoreDisplay}</p>
+        <p><b>Recommended Careers:</b></p>
+        ${recommendedList}
+        <p><b>Date:</b> ${formatDate(data.timestamp)}</p>
+      `;
+      resultsDiv.appendChild(card);
+    });
+  } catch (err) {
+    console.error("❌ Error fetching quiz results:", err);
+    loadingDiv.textContent = "⚠️ Failed to load quiz history. Please try again.";
+  }
+}
+
+// Listen for Auth state
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    loadQuizResults(user);
+  } else {
+    loadingDiv.textContent = "Please log in to view your results.";
+  }
+});
+
+// Redirect to personality test
+window.goBack = function(){
+  window.location.href = "career-test.html";
+};
+</script>
+</body>
+</html>

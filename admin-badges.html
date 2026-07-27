@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="CareerLogo.png" />
+<title>Admin - Approve Badges</title>
+<style>
+  body { font-family: Arial; background:#f4f6fb; margin:0; color:#1A2A80; }
+  header { background:#1A2A80; color:#fff; padding:20px; text-align:center; }
+  .container { max-width:900px; margin:auto; padding:20px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:15px; }
+  .card { background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+  .card h3 { margin:0; color:#1A2A80; }
+  .card p { margin:5px 0; }
+  button { background:#3B38A0; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; }
+  button:hover { background:#1A2A80; }
+  .approved { color:green; font-weight:bold; }
+  .pending { color:orange; font-weight:bold; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Admin - Approve Badges</h1>
+</header>
+
+<div class="container">
+  <div id="achievementsList" class="cards"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+    authDomain: "auth-demo-37f58.firebaseapp.com",
+    projectId: "auth-demo-37f58",
+    storageBucket: "auth-demo-37f58.appspot.com",
+    messagingSenderId: "799076361553",
+    appId: "1:799076361553:web:6ff356a4d894a27cfb9f70"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const achievementsList = document.getElementById("achievementsList");
+
+// Replace with your admin UID
+const adminUid = "4fNzKdtwSBVXbnvxilAvgIuarA73";
+
+onAuthStateChanged(auth, async user=>{
+  if(!user) { alert("Login required"); window.location.href="loginPage.html"; return; }
+  if(user.uid !== adminUid){ alert("Access Denied"); return; }
+
+  loadAllAchievements();
+});
+
+// ---------------- Load All Users Achievements ----------------
+async function loadAllAchievements(){
+  achievementsList.innerHTML = "<p>Loading achievements...</p>";
+  achievementsList.innerHTML = "";
+
+  // Get all users
+  const usersSnapshot = await getDocs(collection(db, "users"));
+  usersSnapshot.forEach(async userDoc=>{
+    const uid = userDoc.id;
+    const achCol = collection(db, "users", uid, "achievements");
+    const achSnapshot = await getDocs(achCol);
+
+    achSnapshot.forEach(docSnap=>{
+      const a = docSnap.data();
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${a.title}</h3>
+        <p>${a.description}</p>
+        <p>Status: <span class="${a.approved ? 'approved':'pending'}">${a.approved ? 'Approved ✅':'Pending ⏳'}</span></p>
+        <button>Approve</button>
+      `;
+      const btn = card.querySelector("button");
+      btn.addEventListener("click", async ()=>{
+        await updateDoc(doc(db, "users", uid, "achievements", docSnap.id), { approved:true });
+        loadAllAchievements();
+      });
+      achievementsList.appendChild(card);
+    });
+  });
+}
+</script>
+</body>
+</html>

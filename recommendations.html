@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Live Career Recommendations</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#F5F5FA;
+color:#1A2A80;
+}
+
+header{
+background:#1A2A80;
+color:white;
+padding:15px;
+text-align:center;
+}
+
+.section{
+padding:30px;
+max-width:1000px;
+margin:auto;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chart{
+max-width:400px;
+margin:20px auto;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>📊 Live Career Recommendations</h2>
+</header>
+
+<section class="section" id="results"></section>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore,collection,onSnapshot,query,orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+authDomain:"auth-demo-37f58.firebaseapp.com",
+projectId:"auth-demo-37f58"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const container=document.getElementById("results");
+
+let charts = []; // store charts to destroy later
+
+onAuthStateChanged(auth,user=>{
+
+if(!user){
+container.innerHTML="<h3>Please login first</h3>";
+return;
+}
+
+// 🔥 REAL-TIME LISTENER
+const q=query(
+collection(db,"users",user.uid,"quizResults"),
+orderBy("timestamp","desc")
+);
+
+onSnapshot(q,(snapshot)=>{
+
+container.innerHTML="";
+
+// destroy old charts
+charts.forEach(c=>c.destroy());
+charts=[];
+
+if(snapshot.empty){
+container.innerHTML="<h3>No results yet</h3>";
+return;
+}
+
+snapshot.forEach((doc,index)=>{
+
+const data=doc.data();
+const date=data.timestamp?.toDate().toLocaleString() || "Unknown";
+
+const div=document.createElement("div");
+div.className="card";
+
+div.innerHTML=`
+<h3>🧠 Personality: ${data.personality.join(", ")}</h3>
+<p><b>Date:</b> ${date}</p>
+
+<canvas id="pie${index}" class="chart"></canvas>
+<canvas id="bar${index}" class="chart"></canvas>
+
+<ul>
+${data.recommended.map(c=>`<li>${c.career} (${c.score}%)</li>`).join("")}
+</ul>
+`;
+
+container.appendChild(div);
+
+// draw charts
+createCharts(data,index);
+
+});
+
+});
+
+});
+
+function createCharts(data,index){
+
+// PIE CHART
+const pieChart = new Chart(document.getElementById(`pie${index}`),{
+type:"pie",
+data:{
+labels:["Analytical","Creative","Introvert","Extrovert"],
+datasets:[{
+data:[
+data.scores.analytical,
+data.scores.creative,
+data.scores.introvert,
+data.scores.extrovert
+],
+backgroundColor:["#3B38A0","#6C63FF","#8E87FF","#B2B0E8"]
+}]
+}
+});
+
+// BAR CHART
+const barChart = new Chart(document.getElementById(`bar${index}`),{
+type:"bar",
+data:{
+labels:data.recommended.map(c=>c.career),
+datasets:[{
+label:"Match %",
+data:data.recommended.map(c=>c.score)
+}]
+},
+options:{
+scales:{y:{beginAtZero:true,max:100}}
+}
+});
+
+// store charts
+charts.push(pieChart);
+charts.push(barChart);
+
+}
+
+</script>
+
+</body>
+</html>

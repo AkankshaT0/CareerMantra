@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="CareerLogo.png" />
+<title>CareerMantra - Personality Based Career Guidance System</title>
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  body {
+    background: #f4f6fb;
+    color: #1A2A80;
+    font-family: 'Arial', sans-serif;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1A2A80, #3B38A0);
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .logo-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .logo-heading img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    background: white;
+    margin-left: 4px;
+    animation: blink 0.7s steps(1) infinite;
+    height: 35px;
+    vertical-align: bottom;
+  }
+
+  @keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+  }
+
+  header p {
+    font-size: 1.1rem;
+    margin-top: 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeIn 1.5s ease forwards;
+  }
+
+  .extra-info {
+    font-size: 1rem;
+    margin-top: 10px;
+    color: #e0e0ff;
+    animation: fadeIn 2s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feature-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  }
+
+  .feature-card img {
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .feature-card:hover img {
+    transform: scale(1.05);
+  }
+
+  .get-started {
+    padding: 15px 45px;
+    font-size: 1.2rem;
+    background: #3B38A0;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+
+  .get-started:hover {
+    background: #1A2A80;
+    transform: scale(1.05);
+  }
+
+  @media(max-width: 600px){
+    h1 { font-size: 1.6rem; }
+    .cursor { height: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-heading mb-3">
+    <img src="CareerLogo.png" alt="CareerMantra Logo">
+    <div>
+      <h1 id="animated-heading" class="d-inline"></h1><span class="cursor"></span>
+    </div>
+  </div>
+
+  <p>Discover your strengths, plan your career, and achieve your goals with personalized guidance and resources.</p>
+  <div class="extra-info">
+    Take personality quizzes, track your skills, plan your goals, explore job & internship alerts, and unlock achievements tailored just for you.
+  </div>
+</header>
+
+<div class="container my-5">
+  <div class="row g-4">
+
+    <div class="col-md-6 col-lg-3">
+      <div class="card feature-card">
+        <img src="career.jpg" class="card-img-top" alt="Career">
+        <div class="card-body text-center">
+          <h5 class="card-title">Career Planning</h5>
+          <p class="card-text text-muted">Explore career paths that match your personality and skills.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="card feature-card">
+        <img src="personality.jpg" class="card-img-top" alt="Personality">
+        <div class="card-body text-center">
+          <h5 class="card-title">Personality Insights</h5>
+          <p class="card-text text-muted">Understand your strengths and areas to improve with assessments.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="card feature-card">
+        <img src="mentorship.jpg" class="card-img-top" alt="Guidance">
+        <div class="card-body text-center">
+          <h5 class="card-title">Mentorship</h5>
+          <p class="card-text text-muted">Get guidance from experts to plan and execute your career strategy.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="card feature-card">
+        <img src="skilldev.jpg" class="card-img-top" alt="Learning">
+        <div class="card-body text-center">
+          <h5 class="card-title">Skill Development</h5>
+          <p class="card-text text-muted">Learn new skills and track progress to enhance your career opportunities.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="text-center mt-5">
+    <button class="get-started" onclick="window.open('loginpage.html', '_blank')">Get Started</button>
+  </div>
+</div>
+
+<!-- Typing Animation Script (Your Logic Kept Same) -->
+<script>
+const headingText = "CareerMantra - Personality Based Career Guidance System";
+const headingElement = document.getElementById("animated-heading");
+let index = 0;
+let typing = true;
+
+function typeEffect() {
+  if(typing){
+    headingElement.textContent = headingText.substring(0, index);
+    index++;
+    if(index > headingText.length){
+      typing = false;
+      setTimeout(typeEffect, 1500); // Pause at end
+      return;
+    }
+    setTimeout(typeEffect, 100);
+  } else {
+    headingElement.textContent = headingText.substring(0, index);
+    index--;
+    if(index < 0){
+      typing = true;
+      setTimeout(typeEffect, 500); // Pause at start
+      return;
+    }
+    setTimeout(typeEffect, 50);
+  }
+}
+
+window.onload = typeEffect;
+</script>
+
+</body>
+</html>

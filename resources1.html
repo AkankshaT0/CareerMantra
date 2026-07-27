@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Resources | Career Portal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F5F7FF;
+  --card:#ffffff;
+  --text:#1A2A80;
+}
+body.dark{
+  --bg:#0F172A;
+  --card:#1E293B;
+  --text:#E5E7EB;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Poppins, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* HEADER */
+header{
+  background:linear-gradient(135deg,#1A2A80,#3B38A0);
+  color:white;
+  padding:18px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header button{
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* SECTION */
+.section{
+  max-width:1100px;
+  margin:auto;
+  padding:30px 20px;
+}
+
+/* FILTERS */
+.filters{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:20px 0;
+}
+.filterBtn{
+  background:#3B38A0;
+  color:white;
+  padding:8px 16px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+}
+.filterBtn.active{
+  background:#FFD700;
+  color:black;
+}
+
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:var(--card);
+  padding:18px;
+  border-radius:16px;
+  box-shadow:0 12px 35px rgba(0,0,0,.12);
+  opacity:0;
+  transform:translateY(40px);
+  transition:.6s;
+}
+.card.show{
+  opacity:1;
+  transform:none;
+}
+
+.card h3{
+  margin:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.badge{
+  background:#FFD700;
+  padding:2px 8px;
+  border-radius:6px;
+  font-size:12px;
+  color: black;
+}
+
+.actions{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+.actions button{
+  background:#E5E7EB;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+}
+.dark .actions button{
+  background:#334155;
+  color:white;
+}
+
+/* FLOATING BUTTON */
+.fab{
+  position:fixed;
+  bottom:30px;
+  right:30px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#FFD700;
+  font-size:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  border:none;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>📚 Career Resources</h2>
+  <div>
+    <button id="darkToggle">🌙</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<section class="section">
+
+<h2 style="text-align:center">
+  <span id="resourceCount">0</span> Resources Available
+</h2>
+
+<div class="filters">
+  <button class="filterBtn" data-field="analytical">🧠 Analytical</button>
+  <button class="filterBtn" data-field="creative">🎨 Creative</button>
+  <button class="filterBtn" data-field="introvert">🤐 Introvert</button>
+  <button class="filterBtn" data-field="extrovert">😃 Extrovert</button>
+</div>
+
+<div class="cards" id="cards"></div>
+</section>
+
+<!-- <button class="fab">➕</button> -->
+
+<script type="module">
+/* ================= FIREBASE ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+  getFirestore, collection, onSnapshot,
+  doc, updateDoc, increment, arrayUnion, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { 
+  getAuth, onAuthStateChanged, signOut 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+  authDomain: "auth-demo-37f58.firebaseapp.com",
+  projectId: "auth-demo-37f58",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* ================= AUTH PROTECTION ================= */
+onAuthStateChanged(auth, user=>{
+  if(!user){
+    window.location.href="loginPage.html";
+  }else{
+    setDoc(doc(db,"users",user.uid),{email:user.email},{merge:true});
+  }
+});
+
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = async ()=>{
+  await signOut(auth);
+  window.location.href="loginPage.html";
+};
+
+/* ================= DARK MODE ================= */
+const toggle=document.getElementById("darkToggle");
+toggle.onclick=()=>{
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light");
+};
+if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
+
+/* ================= LOAD RESOURCES (REAL-TIME) ================= */
+const cardsDiv=document.getElementById("cards");
+const countEl=document.getElementById("resourceCount");
+let resources=[];
+
+onSnapshot(collection(db,"resources"), snapshot=>{
+  resources=snapshot.docs.map(d=>({...d.data(),id:d.id}));
+  countEl.innerText=snapshot.size;   // ✅ exact auto-updating count
+  display(resources);
+});
+
+/* ================= DISPLAY ================= */
+function display(list){
+  cardsDiv.innerHTML="";
+  list.forEach(r=>{
+    const c=document.createElement("div");
+    c.className="card";
+    c.innerHTML=`
+    <img src="${r.image || 'default.png'}" 
+    style="width:100%;border-radius:10px;margin-bottom:10px">
+
+    <h3>${r.icon||"📘"} ${r.title} 
+    <span class="badge">${r.field}</span></h3>      
+    <p>${r.description||""}</p>
+      <div class="actions">
+        <button onclick="like('${r.id}')">👍 ${r.likes||0}</button>
+        <button onclick="save('${r.id}')">⭐ Save</button>
+      </div>
+      <a href="${r.link}" target="_blank">Open Resource</a>
+    `;
+    cardsDiv.appendChild(c);
+    observer.observe(c);
+  });
+}
+
+/* ================= FILTER ================= */
+document.querySelectorAll(".filterBtn").forEach(b=>{
+  b.onclick=async()=>{
+
+    document.querySelectorAll(".filterBtn")
+    .forEach(x=>x.classList.remove("active"));
+
+    b.classList.add("active");
+
+    const field=b.dataset.field;
+
+    try{
+
+      const res=await fetch("http://127.0.0.1:5000/filter_resources",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({field:field})
+      });
+
+      const filtered=await res.json();
+
+      display(filtered);
+
+    }catch(err){
+
+      console.log("Flask not running, using Firebase filter");
+
+      display(resources.filter(r=>r.field===field));
+
+    }
+
+  };
+});
+
+/* ================= LIKE ================= */
+window.like=async(id)=>{
+  await updateDoc(doc(db,"resources",id),{likes:increment(1)});
+};
+
+/* ================= SAVE ================= */
+window.save=async(id)=>{
+  const user=auth.currentUser;
+  if(!user) return alert("Login required");
+  await updateDoc(doc(db,"users",user.uid),{
+    savedResources:arrayUnion(id)
+  });
+  alert("Saved successfully");
+};
+
+/* ================= SCROLL ANIMATION ================= */
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add("show");
+  });
+});
+</script>
+
+</body>
+</html>

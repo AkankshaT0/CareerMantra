@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Path Simulator</title>
+
+<style>
+body { font-family: Arial; background:#F5F5FA; padding:20px; }
+h1 { text-align:center; color:#1A2A80; }
+
+.container {
+  max-width:950px; margin:auto; background:white;
+  padding:25px; border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
+
+select, button {
+  width:100%; padding:12px; margin-top:10px;
+}
+
+button {
+  background:#3B38A0; color:white; border:none;
+  cursor:pointer; border-radius:8px;
+}
+
+.result {
+  margin-top:20px; padding:20px;
+  background:#E8E8FF; border-radius:10px;
+}
+
+.stage { margin-bottom:15px; }
+</style>
+</head>
+
+<body>
+
+<h1>🧠 Advanced Path Simulator</h1>
+
+<div class="container">
+
+<label>Select Skill</label>
+<select id="skill">
+
+<!-- TECH -->
+<option value="web">Web Development</option>
+<option value="data">Data Science</option>
+<option value="ai">Artificial Intelligence</option>
+<option value="cyber">Cybersecurity</option>
+<option value="uiux">UI/UX Design</option>
+
+<!-- NON TECH -->
+<option value="content_creator">Content Creator</option>
+<option value="public_speaking">Public Speaking</option>
+<option value="sales">Sales</option>
+<option value="entrepreneur">Entrepreneurship</option>
+<option value="photography">Photography</option>
+<option value="event_management">Event Management</option>
+<option value="psychology">Psychology</option>
+<option value="fashion_design">Fashion Design</option>
+<option value="fitness_trainer">Fitness Trainer</option>
+<option value="cooking">Cooking</option>
+<option value="travel_planner">Travel Planner</option>
+<option value="social_media_manager">Social Media Manager</option>
+<option value="customer_support">Customer Support</option>
+<option value="anchor">Anchor</option>
+<option value="makeup_artist">Makeup Artist</option>
+<option value="interior_design">Interior Designer</option>
+<option value="language_expert">Language Expert</option>
+<option value="yoga_instructor">Yoga Instructor</option>
+<option value="music">Musician</option>
+<option value="dance">Dancer</option>
+
+</select>
+
+<button onclick="showRoadmap()">Generate Career Path</button>
+<div id="result" class="result"></div>
+
+</div>
+
+<script>
+
+const roadmaps = {
+
+// ---------- TECH ----------
+
+web:{
+title:"🌐 Web Development",
+duration:"6–9 Months",
+focus:"JavaScript, React, Backend",
+extraSkills:"Git, Deployment",
+stages:[
+{title:"Stage 1 (1 Month)",learn:"HTML, CSS",where:"YouTube, freeCodeCamp",do:"Build portfolio"},
+{title:"Stage 2 (1.5 Months)",learn:"JavaScript",where:"JS.info",do:"Projects"},
+{title:"Stage 3 (2 Months)",learn:"React",where:"Scrimba",do:"Apps"},
+{title:"Stage 4 (2 Months)",learn:"Node.js",where:"YouTube",do:"APIs"},
+{title:"Stage 5",learn:"Database",where:"MongoDB docs",do:"Store data"},
+{title:"Stage 6",learn:"Full stack",where:"Practice",do:"Deploy project"}
+]},
+
+data:{
+title:"📊 Data Science",
+duration:"6–8 Months",
+focus:"Python, ML",
+extraSkills:"Statistics",
+stages:[
+{title:"Stage 1",learn:"Python",where:"YouTube",do:"Problems"},
+{title:"Stage 2",learn:"Statistics",where:"Khan Academy",do:"Practice"},
+{title:"Stage 3",learn:"Pandas",where:"freeCodeCamp",do:"Datasets"},
+{title:"Stage 4",learn:"Visualization",where:"YouTube",do:"Graphs"},
+{title:"Stage 5",learn:"ML",where:"Coursera",do:"Project"}
+]},
+
+ai:{
+title:"🧠 AI Engineer",
+duration:"8–12 Months",
+focus:"Deep Learning",
+extraSkills:"Math",
+stages:[
+{title:"Stage 1",learn:"Python + Math",where:"YouTube",do:"Basics"},
+{title:"Stage 2",learn:"ML",where:"Coursera",do:"Models"},
+{title:"Stage 3",learn:"Deep Learning",where:"DeepLearning.ai",do:"NN"},
+{title:"Stage 4",learn:"NLP",where:"YouTube",do:"Chatbot"}
+]},
+
+cyber:{
+title:"🔐 Cybersecurity",
+duration:"6–10 Months",
+focus:"Networking",
+extraSkills:"Linux",
+stages:[
+{title:"Stage 1",learn:"Networking",where:"Cisco",do:"Practice"},
+{title:"Stage 2",learn:"Linux",where:"YouTube",do:"Commands"},
+{title:"Stage 3",learn:"Ethical hacking",where:"Udemy",do:"Kali Linux"},
+{title:"Stage 4",learn:"Pen testing",where:"TryHackMe",do:"Labs"}
+]},
+
+uiux:{
+title:"🎨 UI/UX Design",
+duration:"4–6 Months",
+focus:"Design",
+extraSkills:"Research",
+stages:[
+{title:"Stage 1",learn:"Design basics",where:"YouTube",do:"Redesign"},
+{title:"Stage 2",learn:"Figma",where:"Docs",do:"UI"},
+{title:"Stage 3",learn:"UX",where:"Google Course",do:"Case study"},
+{title:"Stage 4",learn:"Portfolio",where:"Practice",do:"Upload"}
+]},
+
+// ---------- NON TECH ----------
+
+content_creator:{
+title:"🎥 Content Creator",
+duration:"3–6 Months",
+focus:"Creativity",
+extraSkills:"Editing",
+stages:[
+{title:"Stage 1",learn:"Niche",where:"YouTube",do:"Page"},
+{title:"Stage 2",learn:"Content",where:"Instagram",do:"Reels"},
+{title:"Stage 3",learn:"Editing",where:"CapCut",do:"Videos"},
+{title:"Stage 4",learn:"Growth",where:"YouTube",do:"Followers"}
+]},
+
+public_speaking:{
+title:"🎤 Public Speaking",
+duration:"2–4 Months",
+focus:"Confidence",
+extraSkills:"Body language",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Speak"},
+{title:"Stage 2",learn:"Storytelling",where:"TED",do:"Record"},
+{title:"Stage 3",learn:"Presentation",where:"Practice",do:"Talk"},
+{title:"Stage 4",learn:"Advanced",where:"Events",do:"Compete"}
+]},
+
+sales:{
+title:"💼 Sales",
+duration:"3–6 Months",
+focus:"Communication",
+extraSkills:"Negotiation",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Understand"},
+{title:"Stage 2",learn:"Pitching",where:"Practice",do:"Sell"},
+{title:"Stage 3",learn:"Closing",where:"Courses",do:"Deals"},
+{title:"Stage 4",learn:"Clients",where:"Experience",do:"Handle"}
+]},
+
+entrepreneur:{
+title:"🚀 Entrepreneurship",
+duration:"6–12 Months",
+focus:"Business",
+extraSkills:"Finance",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Ideas"},
+{title:"Stage 2",learn:"Validation",where:"Online",do:"Test"},
+{title:"Stage 3",learn:"Execution",where:"Practice",do:"Start"},
+{title:"Stage 4",learn:"Scaling",where:"Experience",do:"Grow"}
+]},
+
+photography:{
+title:"📸 Photography",
+duration:"3–6 Months",
+focus:"Creativity",
+extraSkills:"Editing",
+stages:[
+{title:"Stage 1",learn:"Camera",where:"YouTube",do:"Photos"},
+{title:"Stage 2",learn:"Composition",where:"Online",do:"Shoot"},
+{title:"Stage 3",learn:"Editing",where:"Lightroom",do:"Edit"},
+{title:"Stage 4",learn:"Portfolio",where:"Practice",do:"Page"}
+]},
+
+event_management:{
+title:"🎉 Event Management",
+duration:"3–6 Months",
+focus:"Planning",
+extraSkills:"Leadership",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Plan"},
+{title:"Stage 2",learn:"Budget",where:"Online",do:"Manage"},
+{title:"Stage 3",learn:"Execution",where:"Practice",do:"Event"},
+{title:"Stage 4",learn:"Networking",where:"Experience",do:"Connect"}
+]},
+
+psychology:{
+title:"🧠 Psychology",
+duration:"6–12 Months",
+focus:"Human behavior",
+extraSkills:"Communication",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"Coursera",do:"Understand"},
+{title:"Stage 2",learn:"Counseling",where:"Courses",do:"Practice"},
+{title:"Stage 3",learn:"Advanced",where:"Books",do:"Case study"},
+{title:"Stage 4",learn:"Application",where:"Internship",do:"Help"}
+]},
+
+fashion_design:{
+title:"👗 Fashion Design",
+duration:"6–12 Months",
+focus:"Creativity",
+extraSkills:"Marketing",
+stages:[
+{title:"Stage 1",learn:"Design",where:"YouTube",do:"Sketch"},
+{title:"Stage 2",learn:"Fabric",where:"Courses",do:"Learn"},
+{title:"Stage 3",learn:"Sewing",where:"Practice",do:"Make"},
+{title:"Stage 4",learn:"Portfolio",where:"Practice",do:"Show"}
+]},
+
+fitness_trainer:{
+title:"💪 Fitness Trainer",
+duration:"3–6 Months",
+focus:"Health",
+extraSkills:"Nutrition",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Workout"},
+{title:"Stage 2",learn:"Exercises",where:"Gym",do:"Train"},
+{title:"Stage 3",learn:"Nutrition",where:"Courses",do:"Diet"},
+{title:"Stage 4",learn:"Coaching",where:"Practice",do:"Train others"}
+]},
+
+cooking:{
+title:"🍳 Cooking",
+duration:"2–5 Months",
+focus:"Taste",
+extraSkills:"Presentation",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Cook"},
+{title:"Stage 2",learn:"Advanced",where:"Practice",do:"Try"},
+{title:"Stage 3",learn:"Presentation",where:"Online",do:"Plate"},
+{title:"Stage 4",learn:"Monetize",where:"Instagram",do:"Blog"}
+]},
+
+travel_planner:{
+title:"✈️ Travel Planner",
+duration:"3–5 Months",
+focus:"Planning",
+extraSkills:"Communication",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Trips"},
+{title:"Stage 2",learn:"Budget",where:"Online",do:"Cost"},
+{title:"Stage 3",learn:"Itinerary",where:"Practice",do:"Plan"},
+{title:"Stage 4",learn:"Clients",where:"Experience",do:"Plan others"}
+]},
+
+social_media_manager:{
+title:"📱 Social Media Manager",
+duration:"3–6 Months",
+focus:"Content",
+extraSkills:"Marketing",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Page"},
+{title:"Stage 2",learn:"Strategy",where:"Courses",do:"Posts"},
+{title:"Stage 3",learn:"Analytics",where:"Tools",do:"Track"},
+{title:"Stage 4",learn:"Clients",where:"Freelance",do:"Manage"}
+]},
+
+customer_support:{
+title:"📞 Customer Support",
+duration:"2–4 Months",
+focus:"Communication",
+extraSkills:"Problem solving",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"Practice",do:"Improve"},
+{title:"Stage 2",learn:"Handling",where:"YouTube",do:"Calls"},
+{title:"Stage 3",learn:"Tools",where:"Online",do:"CRM"},
+{title:"Stage 4",learn:"Job ready",where:"Practice",do:"Apply"}
+]},
+
+anchor:{
+title:"🎙 Anchor",
+duration:"2–4 Months",
+focus:"Confidence",
+extraSkills:"Voice",
+stages:[
+{title:"Stage 1",learn:"Speaking",where:"YouTube",do:"Practice"},
+{title:"Stage 2",learn:"Voice",where:"Practice",do:"Record"},
+{title:"Stage 3",learn:"Hosting",where:"Events",do:"Anchor"},
+{title:"Stage 4",learn:"Pro",where:"Practice",do:"Live"}
+]},
+
+makeup_artist:{
+title:"💄 Makeup Artist",
+duration:"3–6 Months",
+focus:"Creativity",
+extraSkills:"Clients",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Practice"},
+{title:"Stage 2",learn:"Advanced",where:"Courses",do:"Looks"},
+{title:"Stage 3",learn:"Products",where:"Practice",do:"Understand"},
+{title:"Stage 4",learn:"Clients",where:"Freelance",do:"Bookings"}
+]},
+
+interior_design:{
+title:"🏠 Interior Designer",
+duration:"6–12 Months",
+focus:"Creativity",
+extraSkills:"Software",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Ideas"},
+{title:"Stage 2",learn:"Tools",where:"SketchUp",do:"Design"},
+{title:"Stage 3",learn:"Materials",where:"Practice",do:"Decor"},
+{title:"Stage 4",learn:"Portfolio",where:"Practice",do:"Show"}
+]},
+
+language_expert:{
+title:"🌍 Language Expert",
+duration:"6–12 Months",
+focus:"Fluency",
+extraSkills:"Communication",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"Duolingo",do:"Practice"},
+{title:"Stage 2",learn:"Grammar",where:"Books",do:"Exercises"},
+{title:"Stage 3",learn:"Speaking",where:"Practice",do:"Talk"},
+{title:"Stage 4",learn:"Advanced",where:"Practice",do:"Fluent"}
+]},
+
+yoga_instructor:{
+title:"🧘 Yoga Instructor",
+duration:"3–6 Months",
+focus:"Health",
+extraSkills:"Meditation",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Practice"},
+{title:"Stage 2",learn:"Advanced",where:"Trainer",do:"Improve"},
+{title:"Stage 3",learn:"Teaching",where:"Practice",do:"Teach"},
+{title:"Stage 4",learn:"Certification",where:"Course",do:"Certified"}
+]},
+
+music:{
+title:"🎵 Musician",
+duration:"6–12 Months",
+focus:"Practice",
+extraSkills:"Creativity",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Practice"},
+{title:"Stage 2",learn:"Techniques",where:"Teacher",do:"Improve"},
+{title:"Stage 3",learn:"Recording",where:"Apps",do:"Songs"},
+{title:"Stage 4",learn:"Publishing",where:"YouTube",do:"Upload"}
+]},
+
+dance:{
+title:"💃 Dancer",
+duration:"3–6 Months",
+focus:"Practice",
+extraSkills:"Expression",
+stages:[
+{title:"Stage 1",learn:"Basics",where:"YouTube",do:"Practice"},
+{title:"Stage 2",learn:"Choreography",where:"Classes",do:"Perform"},
+{title:"Stage 3",learn:"Stage",where:"Events",do:"Perform"},
+{title:"Stage 4",learn:"Professional",where:"Competitions",do:"Participate"}
+]}
+
+};
+
+function showRoadmap() {
+  let skill = document.getElementById("skill").value;
+  let data = roadmaps[skill];
+
+  if(!data){
+    document.getElementById("result").innerHTML = "Roadmap not available.";
+    return;
+  }
+
+  let output = `
+  <h2>${data.title}</h2>
+  <p><b>⏳ Duration:</b> ${data.duration}</p>
+  <p><b>🎯 Focus:</b> ${data.focus}</p>
+  <p><b>➕ Extra Skills:</b> ${data.extraSkills}</p>
+  <hr>
+  `;
+
+  data.stages.forEach(stage => {
+    output += `
+    <div class="stage">
+      <h4>${stage.title}</h4>
+      <p><b>📘 Learn:</b> ${stage.learn}</p>
+      <p><b>📍 Where:</b> ${stage.where}</p>
+      <p><b>🛠 Do:</b> ${stage.do}</p>
+    </div>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = output;
+}
+
+</script>
+
+</body>
+</html>

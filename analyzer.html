@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Workshop Tagger - Career Guidance System</title>
+<style>
+body { font-family: Arial; background: #f4f6f8; margin:0; padding:0;}
+.container { width:60%; margin:50px auto; background:#fff; padding:25px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+h1{text-align:center; color:#2c3e50;}
+.description{text-align:center; color:#555; margin-bottom:20px;}
+label{font-weight:bold; display:block; margin-bottom:5px;}
+textarea{width:100%; height:120px; padding:10px; border-radius:5px; border:1px solid #ccc; resize:none; font-size:14px;}
+
+button{
+  margin-top:15px;
+  padding:10px 20px;
+  background-color:#3498db;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+button:hover{
+  background-color:#2980b9;
+}
+
+.output-box{
+  margin-top:25px;
+  padding:15px;
+  background:#f9f9f9;
+  border-radius:5px;
+  border-left:5px solid #3498db;
+}
+
+.output-box h3{margin-top:0; color:#333;}
+ul{padding-left:20px;}
+
+.top-domain{
+  margin-top:10px;
+  font-weight:bold;
+  color:#3498db;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Workshop Tagger</h1>
+<p class="description">Enter a workshop description and get the recommended career domain.</p>
+
+<label for="workshopInput">Enter Workshop Description:</label>
+<textarea id="workshopInput" placeholder="Example: Learn machine learning and AI using Python"></textarea>
+
+<button onclick="analyzeWorkshop()">Analyze Workshop</button>
+
+<div class="output-box">
+<h3>Recommended Career Domains:</h3>
+<ul id="resultList"><li>Results will appear here...</li></ul>
+<p class="top-domain" id="topDomain">Top Recommendation: -</p>
+</div>
+</div>
+
+<script>
+function analyzeWorkshop() {
+    const input = document.getElementById("workshopInput").value.toLowerCase().trim();
+    if (!input) {
+        document.getElementById("resultList").innerHTML = "<li>Please enter a workshop description.</li>";
+        document.getElementById("topDomain").innerText = "Top Recommendation: -";
+        return;
+    }
+
+    const domains = {
+        "Data Science": {
+            "machine learning":3,"ai":3,"artificial intelligence":3,
+            "data analysis":2,"statistics":2,"data science":3,
+            "python":1,"r":1,"pandas":2,"numpy":2
+        },
+        "Software Development": {
+            "coding":3,"programming":3,"software":2,"development":3,
+            "java":2,"javascript":2,"web":2,"app":2,
+            "html":2,"css":2,"react":2,"angular":2,"python":1
+        },
+        "Design": {
+            "design":3,"ui":3,"ux":3,"graphics":2,
+            "photoshop":2,"illustrator":2,"figma":2,
+            "prototyping":2,"adobe":1,"creativity":2,"visual":2
+        },
+        "Cybersecurity": {
+            "security":3,"cybersecurity":3,"ethical hacking":3,
+            "penetration testing":2,"network security":2,
+            "information security":2,"hacking":3
+        },
+
+        /* 🔽 NON-TECH DOMAINS 🔽 */
+
+        "Business & Management": {
+            "business":3,"management":3,"leadership":2,"entrepreneurship":3,
+            "startup":3,"marketing":2,"strategy":2,"finance":2
+        },
+        "Healthcare": {
+            "medical":3,"healthcare":3,"doctor":3,"nursing":2,
+            "hospital":2,"medicine":3,"patient":2,"clinical":2
+        },
+        "Education & Teaching": {
+            "teaching":3,"education":3,"teacher":3,"training":2,
+            "learning":2,"curriculum":2,"classroom":2
+        },
+        "Law": {
+            "law":3,"legal":3,"advocate":3,"court":2,
+            "judge":2,"case":2,"litigation":2
+        },
+        "Arts & Media": {
+            "art":3,"music":3,"dance":2,"acting":3,
+            "media":2,"film":2,"photography":2,"creative":2
+        },
+        "Finance & Accounting": {
+            "finance":3,"accounting":3,"tax":2,"audit":2,
+            "investment":3,"banking":2,"economics":2
+        },
+        "Hospitality & Tourism": {
+            "hotel":3,"tourism":3,"travel":3,"hospitality":3,
+            "restaurant":2,"chef":2,"management":2
+        },
+        "Sports & Fitness": {
+            "sports":3,"fitness":3,"gym":2,"training":2,
+            "coach":2,"athlete":3,"exercise":2
+        },
+        "Agriculture": {
+            "farming":3,"agriculture":3,"crops":2,
+            "soil":2,"irrigation":2,"harvest":2
+        },
+        "Psychology & Counseling": {
+            "psychology":3,"counseling":3,"mental health":3,
+            "therapy":2,"behavior":2,"mind":2
+        }
+    };
+
+    const scores = {};
+    for (const domain in domains) {
+        scores[domain] = 0;
+        for (const keyword in domains[domain]) {
+            const regex = new RegExp("\\b" + keyword + "\\b", "i");
+            if (regex.test(input)) {
+                scores[domain] += domains[domain][keyword];
+            }
+        }
+    }
+
+    const sortedDomains = Object.entries(scores)
+        .filter(([d, s]) => s > 0)
+        .sort((a,b)=> b[1]-a[1]);
+
+    if (sortedDomains.length === 0) {
+        document.getElementById("resultList").innerHTML = "<li>No matching career domain found.</li>";
+        document.getElementById("topDomain").innerText = "Top Recommendation: None";
+        return;
+    }
+
+    let resultHTML = "";
+    sortedDomains.forEach(([domain, score]) => {
+        resultHTML += `<li>${domain}</li>`;
+    });
+
+    document.getElementById("resultList").innerHTML = resultHTML;
+    document.getElementById("topDomain").innerText = "Top Recommendation: " + sortedDomains[0][0];
+}
+</script>
+
+</body>
+</html>

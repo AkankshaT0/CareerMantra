@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="CareerLogo.png" />
+    <title>CareerMantra Dashboard</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f5fa;
+      }
+      header {
+        background: #1a2a80;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .logo-heading img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+      }
+      nav button {
+        background: none;
+        border: none;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.3s;
+        opacity: 0.8;
+      }
+      nav button:hover {
+        color: white;
+        opacity: 1;
+      }
+
+      /* Profile Dropdown */
+      .profile {
+        position: relative;
+        cursor: pointer;
+      }
+      .profile span {
+        color: #fff;
+        font-weight: bold;
+        user-select: none;
+      }
+      .profile-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 40px;
+        background: white;
+        color: #333;
+        min-width: 180px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+        overflow: hidden;
+      }
+      .profile-content p {
+        margin: 0;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      .profile-content button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: #e74c3c;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .profile-content button:hover {
+        background: #c0392b;
+      }
+
+      /* Hero */
+      .hero {
+        background: linear-gradient(135deg, #1a2a80, #3b38a0);
+        color: white;
+        text-align: center;
+        padding: 80px 20px;
+      }
+      .hero h2 {
+        font-size: 36px;
+        margin-bottom: 15px;
+      }
+      .hero p {
+        font-size: 18px;
+      }
+
+      .section {
+        padding: 50px 20px;
+        max-width: 1000px;
+        margin: auto;
+      }
+      .section h3 {
+        color: #1a2a80;
+        font-size: 26px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: #b2b0e8;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        transition: transform 0.3s;
+      }
+      .card:hover {
+        transform: translateY(-8px);
+      }
+      .card h4 {
+        margin-bottom: 10px;
+        color: #3b38a0;
+      }
+      .card button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background: #3b38a0;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        transition: 0.3s;
+      }
+      .card button:hover {
+        background: #1a2a80;
+      }
+
+      /* Chatbot Button Style */
+      .chatbot-button {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #1a2a80, #3b38a0);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 28px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .chatbot-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      }
+
+      footer {
+        background: #1a2a80;
+        color: white;
+        text-align: center;
+        padding: 15px;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo-heading">
+        <img src="CareerLogo.png" alt="CareerMantra Logo" />
+        <h1>CareerMantra</h1>
+      </div>
+      <nav>
+        <button id="homeBtn">Home</button>
+        <button id="testBtn">Career Test</button>
+        <button id="recBtn">Recommendations</button>
+        <button id="resBtn">Resources</button>
+
+        <div class="profile" id="profileDropdown">
+          <span id="userName">Hello, User ▼</span>
+          <div class="profile-content" id="profileContent">
+            <p id="userEmail">user@example.com</p>
+            <button id="logoutBtn">Logout</button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <h2>Welcome to CareerMantra</h2>
+      <p>Your Personality-Based Career Guidance System 🚀</p>
+    </div>
+
+    <section class="section">
+      <h3>Take Your First Step</h3>
+      <div class="cards">
+        <div class="card">
+          <h4>📝 Personality Test</h4>
+          <p>Understand yourself better with a personality-based assessment.</p>
+          <button class="cardBtn" data-page="career-test.html">
+            Start Test
+          </button>
+        </div>
+        <div class="card">
+          <h4>🎯 Career Recommendations</h4>
+          <p>Get career suggestions that fit your strengths.</p>
+          <button class="cardBtn" data-page="recommendations.html">
+            View Careers
+          </button>
+        </div>
+        <div class="card">
+          <h4>📚 Learning Resources</h4>
+          <p>
+            Access curated materials to upskill and prepare for your career
+            path.
+          </p>
+          <button class="cardBtn" data-page="resources1.html">Explore</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Additional Features</h3>
+      <div class="cards">
+        <div class="card">
+          <h4>🧠 Path Simulator (ML)</h4>
+          <p>
+            Simulate different career paths based on your skills and personality
+            using Machine Learning.
+          </p>
+          <button class="cardBtn" data-page="path-simulator.html">
+            Try Simulator
+          </button>
+        </div>
+        <div class="card">
+          <h4>💡 Skills Tracker</h4>
+          <p>
+            Monitor the skills you are learning and check your progress over
+            time.
+          </p>
+          <button class="cardBtn" data-page="skills1.html">Open Tracker</button>
+        </div>
+        <div class="card">
+          <h4>🎯 Career Goals Planner</h4>
+          <p>
+            Plan your short-term and long-term career goals and mark milestones
+            achieved.
+          </p>
+          <button class="cardBtn" data-page="goals1.html">Plan Goals</button>
+        </div>
+        <div class="card">
+          <h4>💼 Projects & Portfolio</h4>
+          <p>
+            Maintain a portfolio of your projects and achievements to impress
+            recruiters.
+          </p>
+          <button class="cardBtn" data-page="portfolio1.html">
+            View Portfolio
+          </button>
+        </div>
+        <div class="card">
+          <h4>📅 Workshops & Webinars</h4>
+          <p>
+            Participate in upcoming workshops and webinars relevant to your
+            career path.
+          </p>
+          <button class="cardBtn" data-page="workshops1.html">
+            View Events
+          </button>
+        </div>
+        <div class="card">
+          <h4>🏆 Achievements & Badges</h4>
+          <p>
+            Complete quizzes, projects, and courses to unlock achievements and
+            badges.
+          </p>
+          <button class="cardBtn" data-page="badges1.html">
+            View Achievements
+          </button>
+        </div>
+        <div class="card">
+          <h4>💼 Job & Internship Alerts</h4>
+          <p>
+            Get alerts for jobs and internships based on your skills and
+            personality type.
+          </p>
+          <button class="cardBtn" data-page="jobs1.html">
+            View Opportunities
+          </button>
+        </div>
+
+        <!-- Chatbot Button -->
+        <div id="chatbotButton" class="chatbot-button">💬</div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 CareerMantra | Personality-Based Career Guidance System</p>
+    </footer>
+
+    <!-- Notifications -->
+    <div id="notifications"></div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+        authDomain: "auth-demo-37f58.firebaseapp.com",
+        projectId: "auth-demo-37f58",
+        storageBucket: "auth-demo-37f58.firebasestorage.app",
+        messagingSenderId: "799076361553",
+        appId: "1:799076361553:web:6ff356a4d894a27cfb9f70",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      let currentUserName = "User";
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUserName = user.displayName || user.email.split("@")[0];
+          document.getElementById("userName").textContent =
+            `Hello, ${currentUserName} ▼`;
+          document.getElementById("userEmail").textContent = user.email;
+        } else {
+          window.location.href = "loginpage.html";
+        }
+      });
+
+      // Profile Dropdown
+      const profileDropdown = document.getElementById("profileDropdown");
+      const profileContent = document.getElementById("profileContent");
+      profileDropdown.addEventListener("click", () => {
+        profileContent.style.display =
+          profileContent.style.display === "block" ? "none" : "block";
+      });
+      document.addEventListener("click", (e) => {
+        if (!profileDropdown.contains(e.target))
+          profileContent.style.display = "none";
+      });
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", () =>
+          signOut(auth).then(() => (window.location.href = "loginpage.html")),
+        );
+
+      // Card Buttons
+      document
+        .querySelectorAll(".cardBtn")
+        .forEach((btn) =>
+          btn.addEventListener(
+            "click",
+            () => (window.location.href = btn.dataset.page),
+          ),
+        );
+
+      // Navbar buttons
+      document
+        .getElementById("homeBtn")
+        .addEventListener(
+          "click",
+          () => (window.location.href = "frontPage.html"),
+        );
+      document
+        .getElementById("testBtn")
+        .addEventListener(
+          "click",
+          () => (window.location.href = "career-test.html"),
+        );
+      document
+        .getElementById("recBtn")
+        .addEventListener(
+          "click",
+          () => (window.location.href = "recommendations.html"),
+        );
+      document
+        .getElementById("resBtn")
+        .addEventListener(
+          "click",
+          () => (window.location.href = "resources1.html"),
+        );
+
+      // Chatbot Button - Redirect to Chatbot
+      document
+        .getElementById("chatbotButton")
+        .addEventListener("click", function () {
+          window.location.href = "chatbot.html";
+        });
+    </script>
+  </body>
+</html>

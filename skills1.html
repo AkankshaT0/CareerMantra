@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="CareerLogo.png" />
+
+<title>Skills Tracker - CareerMantra</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+:root{
+  --bg:#f5f6ff;
+  --card:#ffffff;
+  --text:#1A2A80;
+}
+
+.dark{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --text:#e5e7eb;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  transition:0.4s;
+}
+
+.card-custom{
+  background:var(--card);
+  border-radius:16px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.15);
+  transition:.3s;
+}
+
+.progress{
+  height:10px;
+}
+
+.theme-btn{
+  border-radius:20px;
+}
+ #missingSkills{
+  color:rgb(0, 0, 0);
+}
+/* DARK MODE FIX */
+
+.dark .text-center{
+  color:white;
+}
+
+.progressVal{
+  color:var(--text);
+}
+
+.dark .progressVal{
+  color:white;
+}
+
+.dark #missingSkills{
+  color:white;
+}
+
+.dark #matchScore{
+  color:white;
+}
+.dark .missingTitle{
+  color:white;
+}
+/* Buttons */
+
+.btn-grp{
+  background-color:rgb(72,70,70);
+  opacity:.7;
+  transition:.5s;
+}
+
+.btn-grp:hover{
+  background:black;
+  opacity:1;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-primary px-3">
+<span class="navbar-brand fw-bold">CareerMantra – Skills Tracker</span>
+
+<button class="btn btn-light theme-btn" onclick="toggleTheme()">
+🌗 Theme
+</button>
+
+</nav>
+
+<div class="container my-4">
+
+<!-- ADD SKILL -->
+
+<div class="card card-custom p-3 mb-4">
+
+<h4 class="text-center mb-3">Add New Skill</h4>
+
+<div class="row g-2">
+
+<div class="col-md-4">
+<input class="form-control" id="skillName" placeholder="Skill Name">
+</div>
+
+<div class="col-md-4">
+<select class="form-select" id="skillLevel">
+<option>Beginner</option>
+<option>Intermediate</option>
+<option>Advanced</option>
+</select>
+</div>
+
+<div class="col-md-4">
+<select class="form-select" id="skillCategory">
+<option>Analytical</option>
+<option>Creative</option>
+<option>Introvert</option>
+<option>Extrovert</option>
+</select>
+</div>
+
+</div>
+
+<div class="text-center mt-3">
+<button class="btn btn-primary px-5" onclick="addSkill()">Add Skill</button>
+</div>
+
+</div>
+
+<!-- USER SKILLS -->
+
+<div class="row" id="skillCards"></div>
+
+<!-- AI SKILL GAP -->
+
+<div class="card card-custom p-3 mt-4">
+
+<h4 class="text-center mb-3">Skill Gap Analysis (AI)</h4>
+
+<div class="row">
+
+<div class="col-md-6">
+
+
+<select id="careerSelect" class="form-select">
+
+<option>Web Developer</option>
+<option>Frontend Developer</option>
+<option>Backend Developer</option>
+<option>Full Stack Developer</option>
+<option>Software Engineer</option>
+
+<option>Mobile App Developer</option>
+<option>Game Developer</option>
+<option>Embedded Systems Engineer</option>
+
+<option>Data Scientist</option>
+<option>Data Analyst</option>
+<option>Business Analyst</option>
+<option>Machine Learning Engineer</option>
+<option>AI Engineer</option>
+<option>Computer Vision Engineer</option>
+<option>NLP Engineer</option>
+
+<option>Cloud Engineer</option>
+<option>DevOps Engineer</option>
+<option>Site Reliability Engineer</option>
+
+<option>Cyber Security Analyst</option>
+<option>Ethical Hacker</option>
+<option>Security Engineer</option>
+
+<option>Network Engineer</option>
+<option>System Administrator</option>
+<option>Database Administrator</option>
+
+<option>Blockchain Developer</option>
+<option>AR VR Developer</option>
+
+<option>UI Designer</option>
+<option>UX Designer</option>
+<option>Product Designer</option>
+<option>Graphic Designer</option>
+
+<option>Video Editor</option>
+<option>Animator</option>
+
+<option>Digital Marketing Specialist</option>
+<option>SEO Specialist</option>
+<option>Content Writer</option>
+<option>Technical Writer</option>
+<option>Social Media Manager</option>
+<option>Marketing Manager</option>
+
+<option>Sales Executive</option>
+
+<option>HR Manager</option>
+<option>Recruiter</option>
+
+<option>Project Manager</option>
+<option>Product Manager</option>
+<option>Agile Coach</option>
+<option>Scrum Master</option>
+
+<option>Quality Assurance Engineer</option>
+<option>Automation Tester</option>
+<option>Manual Tester</option>
+<option>Game Tester</option>
+
+<option>Data Engineer</option>
+<option>Big Data Engineer</option>
+
+<option>Cloud Architect</option>
+<option>Solutions Architect</option>
+
+<option>IT Support Specialist</option>
+<option>Help Desk Technician</option>
+
+<option>Robotics Engineer</option>
+<option>Mechatronics Engineer</option>
+
+<option>Automotive Engineer</option>
+<option>Aerospace Engineer</option>
+
+<option>Civil Engineer</option>
+<option>Architect</option>
+<option>Interior Designer</option>
+
+<option>Fashion Designer</option>
+<option>Industrial Designer</option>
+
+<option>Biomedical Engineer</option>
+<option>Bioinformatician</option>
+<option>Pharmacologist</option>
+
+<option>Doctor</option>
+<option>Nurse</option>
+<option>Physiotherapist</option>
+
+<option>Psychologist</option>
+<option>Counselor</option>
+
+<option>Teacher</option>
+<option>Professor</option>
+
+<option>Research Scientist</option>
+<option>Statistician</option>
+<option>Economist</option>
+
+<option>Financial Analyst</option>
+<option>Investment Banker</option>
+
+<option>Accountant</option>
+<option>Chartered Accountant</option>
+<option>Auditor</option>
+
+<option>Lawyer</option>
+<option>Judge</option>
+
+<option>Police Officer</option>
+<option>Forensic Scientist</option>
+
+<option>Journalist</option>
+<option>News Anchor</option>
+
+<option>Film Director</option>
+<option>Photographer</option>
+
+<option>Event Manager</option>
+<option>Travel Consultant</option>
+<option>Hotel Manager</option>
+
+<option>Chef</option>
+<option>Baker</option>
+
+<option>Fitness Trainer</option>
+<option>Sports Coach</option>
+<option>Athlete</option>
+
+<option>Pilot</option>
+<option>Air Traffic Controller</option>
+
+<option>Logistics Manager</option>
+<option>Supply Chain Analyst</option>
+<option>Operations Manager</option>
+
+<option>Entrepreneur</option>
+<option>Startup Founder</option>
+<option>Venture Capital Analyst</option>
+
+<option>Real Estate Agent</option>
+
+<option>Urban Planner</option>
+<option>Environmental Scientist</option>
+<option>Geologist</option>
+
+<option>Astronomer</option>
+<option>Meteorologist</option>
+
+</select>
+
+</select>
+
+</select>
+
+</div>
+
+<div class="col-md-6 text-center">
+
+<button class="btn btn-success" onclick="analyzeSkillGap()">
+Analyze Career Match
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h5 id="matchScore" class="text-center"></h5>
+
+<h6 class="missingTitle">Missing Skills</h6>
+
+<ul id="missingSkills"></ul>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import { getAuth,onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+updateDoc
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+const firebaseConfig={
+
+apiKey:"AIzaSyCBfr5gR5pihZoSTvId8E5Ty_5RCL5MYhw",
+authDomain:"auth-demo-37f58.firebaseapp.com",
+projectId:"auth-demo-37f58",
+storageBucket:"auth-demo-37f58.firebasestorage.app",
+messagingSenderId:"799076361553",
+appId:"1:799076361553:web:6ff356a4d894a27cfb9f70"
+
+};
+
+const app=initializeApp(firebaseConfig);
+
+const auth=getAuth(app);
+
+const db=getFirestore(app);
+
+let currentUser=null;
+
+const skillCardsDiv=document.getElementById("skillCards");
+
+
+/* THEME */
+
+window.toggleTheme=()=>{
+
+document.body.classList.toggle("dark");
+
+};
+
+
+/* RENDER SKILLS */
+
+async function renderSkills(){
+
+if(!currentUser) return;
+
+const ref=collection(db,"users",currentUser.uid,"skills");
+
+const snap=await getDocs(ref);
+
+skillCardsDiv.innerHTML="";
+
+snap.forEach(d=>{
+
+const s=d.data();
+
+const progress=
+s.level==="Beginner"?30:
+s.level==="Intermediate"?60:
+100;
+
+const col=document.createElement("div");
+
+col.className="col-md-4 mb-4";
+
+col.innerHTML=`
+
+<div class="card card-custom p-3">
+
+<input class="form-control mb-2" id="name_${d.id}" value="${s.name}">
+
+<select class="form-select mb-2" id="level_${d.id}">
+<option ${s.level=="Beginner"?"selected":""}>Beginner</option>
+<option ${s.level=="Intermediate"?"selected":""}>Intermediate</option>
+<option ${s.level=="Advanced"?"selected":""}>Advanced</option>
+</select>
+
+<div class="progress mb-2">
+<div class="progress-bar bg-primary" style="width:${progress}%"></div>
+</div>
+
+<small class="progressVal">${progress}% completed</small>
+
+<div class="d-flex gap-2 mt-3">
+
+<button class="btn btn-success btn-grp w-100"
+onclick="updateSkill('${d.id}')">
+Update
+</button>
+
+<button class="btn btn-danger btn-grp w-100"
+onclick="deleteSkill('${d.id}')">
+Delete
+</button>
+
+</div>
+
+</div>`;
+
+skillCardsDiv.appendChild(col);
+
+});
+
+}
+
+
+/* ADD SKILL */
+
+window.addSkill=async()=>{
+
+if(!currentUser) return alert("Login first");
+
+const name=skillName.value.trim();
+
+if(!name) return alert("Enter skill name");
+
+await addDoc(
+collection(db,"users",currentUser.uid,"skills"),
+{
+name,
+level:skillLevel.value,
+category:skillCategory.value,
+createdAt:new Date()
+});
+
+skillName.value="";
+
+renderSkills();
+
+};
+
+
+/* UPDATE */
+
+window.updateSkill=async(id)=>{
+
+const name=document.getElementById(`name_${id}`).value.trim();
+
+const level=document.getElementById(`level_${id}`).value;
+
+await updateDoc(
+doc(db,"users",currentUser.uid,"skills",id),
+{
+name,
+level
+});
+
+renderSkills();
+
+};
+
+
+/* DELETE */
+
+window.deleteSkill=async(id)=>{
+
+if(confirm("Delete this skill?")){
+
+await deleteDoc(
+doc(db,"users",currentUser.uid,"skills",id)
+);
+
+renderSkills();
+
+}
+
+};
+
+
+/* GET USER SKILLS */
+
+async function getUserSkills(){
+
+const ref=collection(db,"users",currentUser.uid,"skills");
+
+const snap=await getDocs(ref);
+
+let skills=[];
+
+snap.forEach(d=>{
+skills.push(d.data().name);
+});
+
+return skills;
+
+}
+
+
+/* AI ANALYSIS */
+
+window.analyzeSkillGap=async()=>{
+
+if(!currentUser) return alert("Login first");
+
+const skills=await getUserSkills();
+
+const career=document.getElementById("careerSelect").value;
+
+const response=await fetch(
+"http://127.0.0.1:5000/skill-gap",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+skills:skills,
+career:career
+})
+});
+
+const result=await response.json();
+
+showPrediction(result);
+
+};
+
+
+/* SHOW RESULT */
+
+function showPrediction(result){
+
+document.getElementById("matchScore").innerText=
+"Career Match Score : "+result.match_score+"%";
+
+const list=document.getElementById("missingSkills");
+
+list.innerHTML="";
+
+result.missing_skills.forEach(skill=>{
+
+const li=document.createElement("li");
+
+li.innerText=skill;
+
+list.appendChild(li);
+
+});
+
+}
+
+
+/* AUTH */
+
+onAuthStateChanged(auth,user=>{
+
+if(user){
+
+currentUser=user;
+
+renderSkills();
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
